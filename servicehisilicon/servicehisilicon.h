@@ -19,7 +19,7 @@ class eServiceFactoryHisilicon: public iServiceHandler
 public:
 	eServiceFactoryHisilicon();
 	virtual ~eServiceFactoryHisilicon();
-	enum { id = 0x1001 };
+	enum { id = eServiceReference::idServiceMP3 };
 
 		// iServiceHandler
 	RESULT play(const eServiceReference &, ePtr<iPlayableService> &ptr);
@@ -91,7 +91,11 @@ public:
 	virtual ~eServiceHisilicon();
 
 		// iPlayableService
+#if SIGCXX_MAJOR_VERSION == 3
 	RESULT connectEvent(const sigc::slot<void(iPlayableService*,int)> &event, ePtr<eConnection> &connection);
+#else
+	RESULT connectEvent(const sigc::slot2<void,iPlayableService*,int> &event, ePtr<eConnection> &connection);
+#endif
 	RESULT start();
 	RESULT stop();
 
@@ -113,6 +117,7 @@ public:
 	RESULT timeshift(ePtr<iTimeshiftService> &ptr) { ptr = 0; return -1; }
 	RESULT tap(ePtr<iTapService> &ptr) { ptr = nullptr; return -1; };
 //	RESULT cueSheet(ePtr<iCueSheet> &ptr) { ptr = 0; return -1; }
+	void setQpipMode(bool, bool) {}
 
 		// iCueSheet
 	PyObject *getCutList();
@@ -122,8 +127,6 @@ public:
 	RESULT rdsDecoder(ePtr<iRdsDecoder> &ptr) { ptr = 0; return -1; }
 	RESULT keys(ePtr<iServiceKeys> &ptr) { ptr = 0; return -1; }
 	RESULT stream(ePtr<iStreamableService> &ptr) { ptr = 0; return -1; }
-
-	void setQpipMode(bool value, bool audio) { }
 
 		// iPausableService
 	RESULT pause();
@@ -254,7 +257,11 @@ private:
 	errorInfo m_errorInfo;
 	std::string m_download_buffer_path;
 	eServiceHisilicon(eServiceReference ref);
+#if SIGCXX_MAJOR_VERSION == 3
 	sigc::signal<void(iPlayableService*,int)> m_event;
+#else
+	sigc::signal2<void,iPlayableService*,int> m_event;
+#endif
 	enum
 	{
 		stIdle, stRunning, stStopped,
